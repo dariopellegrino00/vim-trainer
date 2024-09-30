@@ -1,0 +1,20 @@
+# dune build directory
+_build/
+
+# Ocaml compilation artefacts
+*.cmx
+*.cmi
+*.cmo
+*.o
+*.a
+*.cmxa
+*.cmxs
+*.exe
+
+*.log
+
+.vscode/
+
+*.bak
+
+.opam/

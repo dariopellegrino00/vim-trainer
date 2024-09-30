@@ -1,0 +1,4 @@
+(library
+ (name cursor)  
+ (public_name vtrainer.cursor) 
+ (modules cursor))  
