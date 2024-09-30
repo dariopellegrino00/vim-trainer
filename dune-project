@@ -18,7 +18,7 @@
 (package
  (name vtrainer)
  (synopsis "A project to help people train vim made in Ocaml, to learn vim and Ocaml myself.")
- (description "A longer description")
+ (description "A project to help people train vim made in Ocaml, to learn vim and Ocaml myself. Made using the raylib porting in Ocaml")
  (depends ocaml dune)
  (tags
   (topics "to describe" your project)))

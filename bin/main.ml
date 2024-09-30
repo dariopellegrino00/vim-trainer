@@ -4,7 +4,7 @@ open Cursor
 let setup () =
   Raylib.init_window 800 450 "vimtrainer";
   Raylib.set_target_fps 60;
-  set_trace_log_level Warning (* Show only warnings *)
+  set_trace_log_level Fatal (* Show only warnings *)
 
 
 (* text buffer definition*)
@@ -30,6 +30,19 @@ let draw_buffer buffer cursor font blink =
     done
   ) buffer
 
+(* delete a single character in a line*)
+let remove_char_at_cursor buffer cursor = 
+  let line = buffer.(cursor.y) in
+  let len = String.length line in 
+  if cursor.x > len-1 then invalid_arg "index_out_of_bound" (* this should never happen*)
+  else 
+    let i = cursor.x in 
+    if len == 1 
+      then buffer.(cursor.y) <- " " 
+    else 
+    buffer.(cursor.y) <- (String.sub line 0 i) ^ (String.sub line (i+1) (len - i - 1))
+
+
 let rec loop () =
   if Raylib.window_should_close () then Raylib.close_window ()
   else
@@ -41,11 +54,15 @@ let rec loop () =
 
     if is_key_pressed Key.H || is_key_pressed Key.L || is_key_pressed Key.K || is_key_pressed Key.J 
       then (blink := true; start_blink_time := current_t;); 
-    
+
+    (*movements *)
     if is_key_pressed Key.H then cursor := move_left !cursor;
     if is_key_pressed Key.L then cursor := move_right !cursor buffer;
     if is_key_pressed Key.K then cursor := move_up !cursor buffer;
     if is_key_pressed Key.J then cursor := move_down !cursor buffer;
+
+    (* editing*)
+    if is_key_pressed Key.X then remove_char_at_cursor buffer !cursor;
 
     begin_drawing ();
     clear_background Color.black;
