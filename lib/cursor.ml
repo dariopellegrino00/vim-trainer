@@ -28,23 +28,22 @@ let move_down cursor buffer =
 let is_alphanumeric = function 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9'-> true | _ -> false
 let is_not_alphanumeric c = not (is_alphanumeric c) && c != ' '
 
-(* TODO refactor this every method is the same change only the bool with a fun*)
-(** skip white spaces starting from i char and return the first non white space idx*)
-let rec skip_white_spaces line i = 
-  if i >= String.length line then String.length line - 1
-  else if line.[i] = ' ' then skip_white_spaces line (i+1) 
-  else (print_string ("skip white "); print_char line.[i];print_int i;print_endline ""; i)  
+(** skip the next*)
+let rec skip_chars_til_false line i f = 
+if i >= String.length line then String.length line - 1
+else if f line.[i] then skip_chars_til_false line (i+1) f
+else i
 
-let rec skip_alphanumeric line i =
-  if i >= String.length line then String.length line - 1 
-  else if is_alphanumeric line.[i] then skip_alphanumeric line (i+1) 
-  else (print_string "skip alpha "; print_int i; print_endline ""; i)
+(** skip white spaces starting from i char till return the idx of first non white space idx*)
+let skip_white_spaces line i = skip_chars_til_false line i (fun x -> x = ' ')
 
-let rec skip_non_alphanumeric line i = 
-  if i >= String.length line then String.length line - 1 
-  else if is_not_alphanumeric line.[i] then skip_non_alphanumeric line (i+1) 
-  else (print_string "skip non alpha "; print_int i;print_endline ""; i)
+(** skip alphanumeric chars from i till return the idx of the first non alphanumeric char idx*)
+let skip_alphanumeric line i = skip_chars_til_false line i (fun x -> is_alphanumeric x)
+ 
+(** skip non alphanumeric chars from i till return the idx of the first non alphanumeric is false char idx*)
+let skip_non_alphanumeric line i = skip_chars_til_false line i (fun x -> is_not_alphanumeric x)
 
+(*TODO PROBLEM : cant go on single char words*)
 let next_word_start cursor buffer =
   let x, y= cursor.x, cursor.y in 
   let line = buffer.(y) in
@@ -57,9 +56,15 @@ let next_word_start cursor buffer =
       if is_alphanumeric line.[newi] then newi else skip_white_spaces line newi in
   {cursor with x = newx}
 
-   
-(*TODO PROBLEM : cant go on single char words*)
+(** 
+  jump to start of line
+  out of bound of the string can never happen here, 
+  if it happen it happened before this fun. 
+*)
+let goto_start_of_line cursor = {cursor with x = 0}
 
-(*!**a asfafs*)
+(*for debugging reasons*)
+let print_cursor cursor = 
+  print_endline("cursor -> {x : " ^ string_of_int(cursor.x) ^ " ,y: " ^ string_of_int(cursor.y) ^ "}")
 
-(*Hello, world! afjajfj alora.mag0num(dei) , . gnu.,_gnu !&(;%."£",faffas*)
+  
