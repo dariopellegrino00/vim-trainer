@@ -84,7 +84,7 @@ let normal_mode_uncap_action key cursor buffer =
   | Key.H -> cursor := move_left !cursor
   | Key.K -> cursor := move_up !cursor buffer
   | Key.J -> cursor := move_down !cursor buffer
-  | Key.W -> cursor := next_word_start !cursor buffer
+  | Key.W -> cursor := Word.next_word_start !cursor buffer
   | Key.X -> remove_char_at_cursor buffer cursor (*TODO refactor params order*)
   | Key.Zero -> cursor := start_of_line !cursor
   | _ -> ()
