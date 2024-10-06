@@ -2,7 +2,7 @@ open Raylib
 open Cursor 
 
 let setup () =
-  Raylib.init_window 800 450 "vimtrainer";
+  Raylib.init_window 400 350 "vimtrainer";
   Raylib.set_target_fps 60; (*TODO: refactor time based on fps*)
   set_trace_log_level Fatal (* Show only warnings *)
 
@@ -91,7 +91,8 @@ let normal_mode_uncap_action key cursor buffer =
 
 let normal_mode_cap_action key cursor buffer = 
   match key with 
-  | Key.Minus -> cursor := end_of_line !cursor buffer (*in italian layout raylib bind ' to minus*)
+  | Key.Four -> cursor := end_of_line !cursor buffer (*in italian layout raylib bind ' to minus*)
+  | Key.Minus -> cursor := first_nws_char !cursor buffer
   | _ -> ()
 
 let rec loop () =
