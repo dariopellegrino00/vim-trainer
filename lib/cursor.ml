@@ -24,13 +24,14 @@ let move_down cursor buffer =
   else
     {cursor with y = m}
 
+(*This is all for the 'w' of normal mode*)
 (* refactor in new module?? *)
 let is_alphanumeric = function 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9'-> true | _ -> false
 let is_not_alphanumeric c = not (is_alphanumeric c) && c != ' '
 
 (** skip the next*)
 let rec skip_chars_til_false line i f = 
-if i >= String.length line then String.length line - 1
+if i >= String.length line then (-1)
 else if f line.[i] then skip_chars_til_false line (i+1) f
 else i
 
@@ -39,22 +40,36 @@ let skip_white_spaces line i = skip_chars_til_false line i (fun x -> x = ' ')
 
 (** skip alphanumeric chars from i till return the idx of the first non alphanumeric char idx*)
 let skip_alphanumeric line i = skip_chars_til_false line i (fun x -> is_alphanumeric x)
- 
+
 (** skip non alphanumeric chars from i till return the idx of the first non alphanumeric is false char idx*)
 let skip_non_alphanumeric line i = skip_chars_til_false line i (fun x -> is_not_alphanumeric x)
 
-(*TODO PROBLEM : cant go on single char words*)
+(*TODO REFACTORING: this works but is terrible to see*)
 let next_word_start cursor buffer =
+  let rec w_aux buffer row col is_new_line = 
+    let max_row = Array.length buffer - 1 in 
+    if max_row < row then 
+      {x = String.length buffer.(max_row) - 1; y = max_row}
+    else
+      let line = buffer.(row) in
+      if is_new_line then 
+        {x = skip_white_spaces line col; y = row}
+      else
+        let new_col = 
+          if is_alphanumeric line.[col] then 
+            (skip_alphanumeric line col)
+          else 
+            (skip_non_alphanumeric line col) in
+        if new_col = (-1) then 
+          w_aux buffer (row+1) 0 true
+        else
+          let new_col = skip_white_spaces line new_col in 
+          if new_col = (-1) then 
+            w_aux buffer (row+1) 0 true
+        else 
+          {x = new_col; y = row} in
   let x, y= cursor.x, cursor.y in 
-  let line = buffer.(y) in
-  let i_start = skip_white_spaces line x in
-  let newx = 
-    if is_alphanumeric line.[i_start] 
-    then let newi = (skip_alphanumeric line i_start) in 
-      if is_not_alphanumeric line.[newi] then newi else skip_white_spaces line newi
-    else let newi = (skip_non_alphanumeric line i_start) in 
-      if is_alphanumeric line.[newi] then newi else skip_white_spaces line newi in
-  {cursor with x = newx}
+  w_aux buffer y x false
 
 (** 
   jump to start of line
@@ -67,4 +82,3 @@ let goto_start_of_line cursor = {cursor with x = 0}
 let print_cursor cursor = 
   print_endline("cursor -> {x : " ^ string_of_int(cursor.x) ^ " ,y: " ^ string_of_int(cursor.y) ^ "}")
 
-  
