@@ -76,7 +76,10 @@ let next_word_start cursor buffer =
   out of bound of the string can never happen here, 
   if it happen it happened before this fun. 
 *)
-let goto_start_of_line cursor = {cursor with x = 0}
+let start_of_line cursor = {cursor with x = 0}
+
+let end_of_line cursor buffer = {cursor with x = String.length buffer.(cursor.y) - 1}
+  
 
 (*for debugging reasons*)
 let print_cursor cursor = 

@@ -78,40 +78,47 @@ let remove_char_at_cursor buffer cursor =
       else buffer.(y) <- (String.sub line 0 i) ^ (String.sub line (i+1) (len - i - 1))
 
 (**normal mode key-action binding*)
-let normal_mode_action key cursor buffer = 
+let normal_mode_uncap_action key cursor buffer = 
   match key with 
   | Key.L -> cursor := move_right !cursor buffer
   | Key.H -> cursor := move_left !cursor
   | Key.K -> cursor := move_up !cursor buffer
   | Key.J -> cursor := move_down !cursor buffer
   | Key.W -> cursor := next_word_start !cursor buffer
-  | Key.X -> remove_char_at_cursor buffer cursor (*refactor params order*)
-  | Key.Zero -> cursor := goto_start_of_line !cursor
+  | Key.X -> remove_char_at_cursor buffer cursor (*TODO refactor params order*)
+  | Key.Zero -> cursor := start_of_line !cursor
+  | _ -> ()
+
+let normal_mode_cap_action key cursor buffer = 
+  match key with 
+  | Key.Minus -> cursor := end_of_line !cursor buffer (*in italian layout raylib bind ' to minus*)
   | _ -> ()
 
 let rec loop () =
   if Raylib.window_should_close () then Raylib.close_window ()
   else
-    (* cursor blink*)
+    (* cursor blink logic*)
     let current_t = get_time () in
     if abs_float (current_t -. !start_blink_time) >= blink_delay then (
       blink := not !blink; 
       start_blink_time := current_t;  
     );
-    
-    (*if key last key was release stop moving*)
-    if is_key_released !pressed_key 
-      then pressed_key := Null
-    else 
-      if abs_float(get_time () -. !key_down_time) > 1. (*repeat key down after 1 sec*)
-        then if abs_float (current_t -. !last_move_time ) >= 0.1 (* TODO refactor time in base al frame rate?*)
-        then normal_mode_action !pressed_key cursor buffer;
 
     (* if pressed get the current pressed key and reset the down key time*)
     let current_key = get_key_pressed () in 
     if current_key != Null then (key_down_time := current_t; pressed_key := current_key);
-    normal_mode_action current_key cursor buffer;
 
+    if is_key_down Key.Left_shift then (* Uppercase letter commands*)
+      normal_mode_cap_action current_key cursor buffer
+    else 
+      (normal_mode_uncap_action current_key cursor buffer; (*Lower case letters commands*)
+      if is_key_released !pressed_key  (*if key last key was release stop moving*)
+        then pressed_key := Null
+      else 
+        if abs_float(get_time () -. !key_down_time) > 1. (*repeat key down after 1 sec*)
+          then if abs_float (current_t -. !last_move_time ) >= 0.1 (* TODO refactor time based on frame rate?*)
+          then normal_mode_uncap_action !pressed_key cursor buffer);
+ 
     (* has cursor moved? if yes blink*)
     if !cursor_old <> !cursor then ((blink := true; start_blink_time := current_t));
     cursor_old := !cursor;
