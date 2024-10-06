@@ -24,6 +24,7 @@ let move_down cursor buffer =
   else
     {cursor with y = m}
 
+(*This is all for the 'w' of normal mode*)
 (* refactor in new module?? *)
 let is_alphanumeric = function 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9'-> true | _ -> false
 let is_not_alphanumeric c = not (is_alphanumeric c) && c != ' '
