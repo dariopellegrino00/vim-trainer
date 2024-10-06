@@ -13,8 +13,8 @@ let buffer =
     "Hello, world!"; 
     "This is a simple text editor"; 
     "with Vim hjkl movements."; 
-    "delete all the x to win";
-    "*!**a magnum";
+    "delete all the x to win ! ! !";
+    "*!**a magnum ! ";
     "  x   xxx";
     "x ";
     "x    x x";
