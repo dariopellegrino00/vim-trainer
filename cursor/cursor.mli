@@ -15,4 +15,5 @@ val remove_char_at_cursor: string array -> t ref -> unit
 
 module Word : sig
   val next_word_start : t -> string array -> t
+  val next_full_word_start : t -> string array -> t
 end

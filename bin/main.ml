@@ -44,6 +44,7 @@ let eval_motion_cmd cmd cursor buffer =
     | EndOfLine   -> cursor := end_of_line !cursor buffer
     | BeginOfLine -> cursor := first_nws_char !cursor buffer
     | NextWordStart -> cursor := Word.next_word_start !cursor buffer
+    | NextFullWordStart -> cursor := Word.next_full_word_start !cursor buffer
 (*|  -> remove_char_at_cursor buffer cursor (*TODO refactor params order*) *)
     | NotAMotion -> ()
   )

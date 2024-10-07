@@ -119,7 +119,25 @@ struct
             if new_col = -1 then 
               aux buffer (row + 1) 0 true
             else 
-              make_cursor new_col row 
-    in
-    aux buffer cursor.y cursor.x false
+              make_cursor new_col row in
+      aux buffer cursor.y cursor.x false
+
+  let next_full_word_start cursor buffer = 
+    let num_lines = Array.length buffer in 
+    let skip_all line i = Util.skip_chars_til_false line i (fun c -> c <> ' ') in 
+    let rec nfw_aux buffer row col = 
+      if row < num_lines then 
+        let new_col = 
+          if col = (-1) then Util.skip_white_spaces buffer.(row) 0 
+          else skip_all buffer.(row) col in 
+        if new_col = (-1) then nfw_aux buffer (row+1) (-1)
+        else 
+          let new_col = Util.skip_white_spaces buffer.(row) new_col in 
+          if new_col = (-1) then nfw_aux buffer (row+1) (-1)
+          else {x = new_col; y = row}
+      else 
+        {x = String.length buffer.(num_lines-1); y = (num_lines-1)} in 
+    nfw_aux buffer cursor.y cursor.x
+      
+
 end
