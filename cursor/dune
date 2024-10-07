@@ -1,0 +1,6 @@
+(library
+ (wrapped false) 
+ (name cursor)  
+ (public_name vtrainer.cursor) 
+ (modules cursor normalModeParser)
+ (libraries angstrom raylib))  
