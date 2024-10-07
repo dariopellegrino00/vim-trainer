@@ -19,7 +19,7 @@
  (name vtrainer)
  (synopsis "A project to help people train vim made in Ocaml, to learn vim and Ocaml myself.")
  (description "A project to help people train vim made in Ocaml, to learn vim and Ocaml myself. Made using the raylib porting in Ocaml")
- (depends ocaml dune)
+ (depends ocaml dune angstrom)
  (tags
   (topics "to describe" your project)))
 
