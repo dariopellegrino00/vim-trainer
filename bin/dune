@@ -1,4 +1,4 @@
 (executable
  (public_name vtrainer)
  (name main)
- (libraries raylib vtrainer.cursor))
+ (libraries raylib vtrainer.cursor vtrainer.drawer))

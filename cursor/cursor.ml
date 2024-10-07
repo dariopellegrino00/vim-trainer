@@ -73,14 +73,29 @@ let first_nws_char cursor buffer =
     make_cursor (Util.skip_white_spaces buffer.(cursor.y) 0) cursor.y
   else
     cursor
-  
+
+(** delete a single character in a line and move cursor if necessary *)
+let remove_char_at_cursor buffer cursor = 
+  let x, y = !cursor.x, !cursor.y in 
+  let line = buffer.(y) in
+  let len = String.length line in 
+  if x > len-1 then invalid_arg "index_out_of_bound" (* this should never happen*)
+  else 
+    let i = x in 
+    if len == 1
+    then buffer.(y) <- " "
+    else if len - 1 == i
+      (* in this case cursor blink*) 
+      then buffer.(y) <- (cursor := move_left !cursor; String.sub line 0 i)
+      else buffer.(y) <- (String.sub line 0 i) ^ (String.sub line (i+1) (len - i - 1))
                
 (** Print cursor position (for debugging) *)
 let print_cursor cursor = 
   Printf.printf "cursor -> {x: %d, y: %d}\n" cursor.x cursor.y
 
-(** Word-related operations module - only 'w' for now *)
-module Word = struct
+module Word =
+struct 
+(* Word-related operations module - only 'w' for now *)
   (* TODO: REFACTORING this is very hard to read, maybe having is_alpha skip also white space would help?*)
   (** Move cursor to the start of the next word *)
   let next_word_start cursor buffer =
