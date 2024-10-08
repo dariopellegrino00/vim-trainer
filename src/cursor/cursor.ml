@@ -1,3 +1,4 @@
+
 (** Cursor module for managing cursor movement in a text buffer *)
 
 type t = { x : int; y : int }
@@ -138,6 +139,4 @@ struct
       else 
         {x = String.length buffer.(num_lines-1); y = (num_lines-1)} in 
     nfw_aux buffer cursor.y cursor.x
-      
-
 end

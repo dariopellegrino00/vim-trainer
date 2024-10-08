@@ -81,7 +81,7 @@ let rec loop () =
     let font = load_font "resources/DejaVuSansMono.ttf" in 
 
     draw_line_numbers buffer font;
-    draw_cursor cursor !blink; (* draw the cursor first to not overwrite the character below*)
+    draw_cursor !cursor.x !cursor.y !blink; (* draw the cursor first to not overwrite the character below*)
     draw_buffer buffer font;
 
     end_drawing ();

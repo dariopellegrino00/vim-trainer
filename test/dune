@@ -1,2 +1,8 @@
-(test
- (name test_vtrainer))
+(library
+ (name test_vtrainer)
+ (libraries vtrainer.cursor)
+ (preprocess 
+  (pps ppx_inline_test ppx_assert))
+ (inline_tests)
+ (modules test_cursor)
+ )
