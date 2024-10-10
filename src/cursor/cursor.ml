@@ -120,30 +120,30 @@ struct
 
     let next_word_end starting buffer = 
       let lines = Array.length buffer in
-      let start_char_ty = get_char_type buffer.(starting.y).[starting.x] in
+      let _start_char_ty = get_char_type buffer.(starting.y).[starting.x] in
       let rec nwe_aux x y last_ct =
         if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
-          else if String.length buffer.(y) <= x then nwe_aux 0 (y+1) Escape
           else
-          let current_ct = get_char_type buffer.(y).[x]
-          in match (start_char_ty, last_ct, current_ct) with
-            | (Alhanumeric | WhiteSpace), Alhanumeric, (Puctuation | WhiteSpace)
-            | (Puctuation | WhiteSpace), Puctuation, (Alhanumeric | WhiteSpace) -> {x = (x-1); y}
-            | Alhanumeric, (NullChar | Escape), Puctuation
-            | Puctuation, (NullChar | Escape), Alhanumeric -> {x; y}
-            | _ , _, (_ as cty) -> nwe_aux (x+1) y cty
+          let current_ct = if x < String.length buffer.(y) then get_char_type buffer.(y).[x] else Escape
+          in match (last_ct, current_ct) with
+            | Alhanumeric, Puctuation 
+            | Puctuation, Alhanumeric 
+            | (Alhanumeric | Puctuation), (WhiteSpace | Escape) -> {x = (x-1); y}
+            | (NullChar | WhiteSpace) , Escape -> nwe_aux 0 (y+1) Escape
+            | _, (_ as cty) -> nwe_aux (x+1) y cty
       in nwe_aux (starting.x+1) starting.y NullChar
 
       let next_full_word_end starting buffer = 
         let lines = Array.length buffer in
         let rec nwe_aux x y last_ct =
           if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
-            else if String.length buffer.(y) <= x then nwe_aux 0 (y+1) Escape
             else
-            let current_ct = if x < String.length buffer.(y) - 1 then get_char_type buffer.(y).[x] else Escape
+            let current_ct = if x < String.length buffer.(y) then get_char_type buffer.(y).[x] else Escape
             in match (last_ct, current_ct) with
+              | (Alhanumeric | Puctuation), Escape   
               | (Alhanumeric | Puctuation), WhiteSpace -> {x = (x-1); y}
-              | (Alhanumeric | Puctuation), Escape -> {x; y}
+              | (NullChar | WhiteSpace), Escape -> nwe_aux 0 (y+1) Escape
               | _, (_ as cty) -> nwe_aux (x+1) y cty 
         in nwe_aux (starting.x+1) starting.y NullChar
+        
 end 

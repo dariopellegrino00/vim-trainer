@@ -90,17 +90,17 @@ let%test_unit "E_jump_inline" =
     [%test_eq: int] (Word.next_full_word_end (Word.next_word_end (make_cursor 0 0) [| " a       !2"|]) [| " a       !2"|]).x 10
 
 let%test_unit "E_jump_row_base" = 
-    let row_jumped = (Word.next_word_end (make_cursor 4 0) [| "Hello"; "Worlds!"|]) in 
+    let row_jumped = (Word.next_full_word_end (make_cursor 4 0) [| "Hello"; "Worlds!"|]) in 
     [%test_eq: int] row_jumped.y 1;
     [%test_eq: int] row_jumped.x 6
 
 let%test_unit "E_jump_row_advanced" =  
     let row_jumped = 
-        Word.next_word_end (Word.next_word_end (make_cursor 4 0) [| "Hello!"; " ***Worlds!"|]) [| "Hello!"; " ***Worlds!"|] in 
+        Word.next_full_word_end (Word.next_full_word_end (make_cursor 4 0) [| "Hello!"; " ***Worlds!"|]) [| "Hello!"; " ***Worlds!"|] in 
     [%test_eq: int] row_jumped.y 1;
     [%test_eq: int] row_jumped.x 10 
 
 let%test_unit "E_jump_some_space_rows" = 
-    let row_jumped = (Word.next_word_end (make_cursor 4 0) [| "Hello  ";"  "; "  ds! "|]) in 
+    let row_jumped = (Word.next_full_word_end (make_cursor 4 0) [| "Hello  ";"  "; "  ds! "|]) in 
         [%test_eq: int] row_jumped.y 2;
-        [%test_eq: int] row_jumped.x 5
+        [%test_eq: int] row_jumped.x 4 
