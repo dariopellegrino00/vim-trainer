@@ -87,13 +87,13 @@ let print_cursor cursor =
 module Word =
 struct 
 
-  type char_t = Alhanumeric | Puctuation | WhiteSpace | Escape
+  type char_t = Alhanumeric | Puctuation | WhiteSpace | Escape | NullChar
 
   let get_char_type = function
     'a' .. 'z' | 'A' .. 'Z' |  '0' .. '9' | '_' -> Alhanumeric
   | ' ' -> WhiteSpace
   |  _  -> Puctuation 
-
+  (*TODO start_char_type exception on empty buffer*)
   let next_word_start starting buffer = 
     let lines = Array.length buffer in
     let start_char_type = get_char_type buffer.(starting.y).[starting.x] in
@@ -116,15 +116,20 @@ struct
         | _ , (_ as cty) -> nfws_aux (x+1) y cty 
     in nfws_aux (starting.x+1) starting.y start_char_type
 
-    let next_word_end starting buffer =
+    let next_word_end starting buffer = 
       let lines = Array.length buffer in
-    let start_char_type = get_char_type buffer.(starting.y).[starting.x] in
-    let rec nfws_aux x y last_char_type =
-      if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
-      else if String.length buffer.(y) <= x then nfws_aux 0 (y+1) Escape 
-        else match last_char_type, get_char_type buffer.(y).[x] with
-        | (WhiteSpace | Escape), (Alhanumeric | Puctuation) -> {x = x; y = y}
-        | _ , (_ as cty) -> nfws_aux (x+1) y cty 
-    in nfws_aux (starting.x+1) starting.y start_char_type
+      let start_char_ty = get_char_type buffer.(starting.y).[starting.x] in
+      let rec nwe_aux x y last_ct =
+        if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
+          else if String.length buffer.(y) <= x then nwe_aux 0 (y+1) Escape
+          else
+          let current_ct = get_char_type buffer.(y).[x] 
+          in match (start_char_ty, last_ct, current_ct) with
+            | (Alhanumeric | WhiteSpace), Alhanumeric, (Puctuation | WhiteSpace)
+            | (Puctuation | WhiteSpace), Puctuation, (Alhanumeric | WhiteSpace) -> {x = (x-1); y = y}
+            | Alhanumeric, (NullChar | Escape), Puctuation
+            | Puctuation, (NullChar | Escape), Alhanumeric -> {x = x; y = y}
+            | _ , _, (_ as cty) -> nwe_aux (x+1) y cty 
+      in nwe_aux (starting.x+1) starting.y NullChar
 
 end
