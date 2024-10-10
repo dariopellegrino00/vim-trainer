@@ -55,3 +55,13 @@ let%test_unit "W_jump_inline" =
     [%test_eq: int] (Word.next_full_word_start starting_pos [| "! a"|]).x 2;
     [%test_eq: int] (Word.next_full_word_start starting_pos [| " !  "|]).x 1
 
+let%test_unit "e_jump_inline" = 
+    [%test_eq: int] (Word.next_word_end (make_cursor 0 0) [| "Hello World!"|]).x 4;
+    [%test_eq: int] (Word.next_word_end (make_cursor 0 0) [| " World!"|]).x 5;
+    [%test_eq: int] (Word.next_word_end (make_cursor 3 0) [| "word!word"|]).x 4;
+    [%test_eq: int] (Word.next_word_end (make_cursor 2 0) [| "wor_d"|]).x 4;
+    [%test_eq: int] (Word.next_word_end (make_cursor 0 0) [| "2"|]).x 0;
+    [%test_eq: int] (Word.next_full_word_start (Word.next_word_end (make_cursor 2 0) [| "a       !2"|]) [| "a       !2"|]).x 9
+
+    
+    

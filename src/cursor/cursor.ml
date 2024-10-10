@@ -116,4 +116,15 @@ struct
         | _ , (_ as cty) -> nfws_aux (x+1) y cty 
     in nfws_aux (starting.x+1) starting.y start_char_type
 
+    let next_word_end starting buffer =
+      let lines = Array.length buffer in
+    let start_char_type = get_char_type buffer.(starting.y).[starting.x] in
+    let rec nfws_aux x y last_char_type =
+      if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
+      else if String.length buffer.(y) <= x then nfws_aux 0 (y+1) Escape 
+        else match last_char_type, get_char_type buffer.(y).[x] with
+        | (WhiteSpace | Escape), (Alhanumeric | Puctuation) -> {x = x; y = y}
+        | _ , (_ as cty) -> nfws_aux (x+1) y cty 
+    in nfws_aux (starting.x+1) starting.y start_char_type
+
 end
