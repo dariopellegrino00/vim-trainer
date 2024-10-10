@@ -1,3 +1,4 @@
+
 (** Cursor module for managing cursor movement in a text buffer *)
 
 type t = { x : int; y : int }
@@ -6,12 +7,6 @@ let create_cursor = { x = 0; y = 0 }
 
 module Util =
 struct 
-let is_alphanumeric = function 
-    | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' -> true 
-    | _ -> false
-
-  let is_not_alphanumeric c = not (is_alphanumeric c) && c != ' '
-
   (** Skip characters in a line until a condition is false *)
   let rec skip_chars_til_false line i f = 
     if i >= String.length line then -1
@@ -21,11 +16,6 @@ let is_alphanumeric = function
   (** Skip white spaces starting from index i *)
   let skip_white_spaces line i = skip_chars_til_false line i (fun x -> x = ' ')
 
-  (** Skip alphanumeric characters starting from index i *)
-  let skip_alphanumeric line i = skip_chars_til_false line i is_alphanumeric
-
-  (** Skip non-alphanumeric characters starting from index i *)
-  let skip_non_alphanumeric line i = skip_chars_til_false line i is_not_alphanumeric  
 end 
 
 let make_cursor x y = { x; y }
@@ -93,51 +83,37 @@ let remove_char_at_cursor buffer cursor =
 let print_cursor cursor = 
   Printf.printf "cursor -> {x: %d, y: %d}\n" cursor.x cursor.y
 
+(** Word-related cursor operations module *)
 module Word =
 struct 
-(* Word-related operations module - only 'w' for now *)
-  (* TODO: REFACTORING this is very hard to read, maybe having is_alpha skip also white space would help?*)
-  (** Move cursor to the start of the next word *)
-  let next_word_start cursor buffer =
-    let rec aux buffer row col is_new_line = 
-      let max_row = Array.length buffer - 1 in 
-      if row > max_row then 
-        make_cursor (String.length buffer.(max_row) - 1) max_row
-      else
-        let line = buffer.(row) in
-        if is_new_line then 
-          make_cursor (Util.skip_white_spaces line col) row
-        else
-          let new_col = 
-            if Util.is_alphanumeric line.[col] then Util.skip_alphanumeric line col
-            else Util.skip_non_alphanumeric line col 
-          in
-          if new_col = -1 then 
-            aux buffer (row + 1) 0 true
-          else
-            let new_col = Util.skip_white_spaces line new_col in 
-            if new_col = -1 then 
-              aux buffer (row + 1) 0 true
-            else 
-              make_cursor new_col row in
-      aux buffer cursor.y cursor.x false
 
-  let next_full_word_start cursor buffer = 
-    let num_lines = Array.length buffer in 
-    let skip_all line i = Util.skip_chars_til_false line i (fun c -> c <> ' ') in 
-    let rec nfw_aux buffer row col = 
-      if row < num_lines then 
-        let new_col = 
-          if col = (-1) then Util.skip_white_spaces buffer.(row) 0 
-          else skip_all buffer.(row) col in 
-        if new_col = (-1) then nfw_aux buffer (row+1) (-1)
-        else 
-          let new_col = Util.skip_white_spaces buffer.(row) new_col in 
-          if new_col = (-1) then nfw_aux buffer (row+1) (-1)
-          else {x = new_col; y = row}
-      else 
-        {x = String.length buffer.(num_lines-1); y = (num_lines-1)} in 
-    nfw_aux buffer cursor.y cursor.x
-      
+  type char_t = Alhanumeric | Puctuation | WhiteSpace | Escape
+
+  let get_char_type = function
+    'a' .. 'z' | 'A' .. 'Z' |  '0' .. '9' | '_' -> Alhanumeric
+  | ' ' -> WhiteSpace
+  |  _  -> Puctuation 
+
+  let next_word_start starting buffer = 
+    let lines = Array.length buffer in
+    let start_char_type = get_char_type buffer.(starting.y).[starting.x] in
+    let rec nws_aux x y last_char_type =
+      if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
+      else if String.length buffer.(y) <= x then nws_aux 0 (y+1) Escape 
+        else match last_char_type, get_char_type buffer.(y).[x] with
+        | Alhanumeric, Puctuation | (Escape | WhiteSpace), (Puctuation | Alhanumeric) | Puctuation, Alhanumeric -> {x = x; y = y}
+        | _ , (_ as cty) -> nws_aux (x+1) y cty 
+    in nws_aux (starting.x+1) starting.y start_char_type
+  
+  let next_full_word_start starting buffer = 
+    let lines = Array.length buffer in
+    let start_char_type = get_char_type buffer.(starting.y).[starting.x] in
+    let rec nfws_aux x y last_char_type =
+      if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
+      else if String.length buffer.(y) <= x then nfws_aux 0 (y+1) Escape 
+        else match last_char_type, get_char_type buffer.(y).[x] with
+        | (WhiteSpace | Escape), (Alhanumeric | Puctuation) -> {x = x; y = y}
+        | _ , (_ as cty) -> nfws_aux (x+1) y cty 
+    in nfws_aux (starting.x+1) starting.y start_char_type
 
 end
