@@ -7,6 +7,11 @@ let%test_unit "w_jump_on_second_row" =
     [%test_eq: int] row_jumped.x 1;
     [%test_eq: int] row_jumped.y 1
 
+let%test_unit "w_jump_on_second_row" = 
+    let row_jumped = (Word.next_word_start (make_cursor 6 0) [| "  a row"; "!another row"|]) in
+    [%test_eq: int] row_jumped.x 0;
+    [%test_eq: int] row_jumped.y 1
+
 let%test_unit "w_skip_ws_rows" =
     let buffer = [| "  a row "; "  "; "   "; "  s "; " "; " ?"|] in 
     let first_rows_jumped = (Word.next_word_start (make_cursor 6 0) buffer) in 
@@ -23,8 +28,13 @@ let%test_unit "w_jump_inline" =
     [%test_eq: int] (Word.next_word_start starting_pos [| "! a"|]).x 2;
     [%test_eq: int] (Word.next_word_start starting_pos [| " !  "|]).x 1
 
+let%test_unit "W_jump_on_second_row_first_char" = 
+    let row_jumped = (Word.next_full_word_start (make_cursor 6 0) [| "  a row"; "another row?"|]) in
+    [%test_eq: int] row_jumped.x 0;
+    [%test_eq: int] row_jumped.y 1
+
 (* vim W unit tests *)
-let%test_unit "W_jump_on_second_row" = 
+let%test_unit "W_jump_on_second_row_space" = 
     let row_jumped = (Word.next_full_word_start (make_cursor 6 0) [| " a row!"; " ?another row?"|]) in
     [%test_eq: int] row_jumped.x 1;
     [%test_eq: int] row_jumped.y 1
