@@ -63,5 +63,18 @@ let%test_unit "e_jump_inline" =
     [%test_eq: int] (Word.next_word_end (make_cursor 0 0) [| "2"|]).x 0;
     [%test_eq: int] (Word.next_full_word_start (Word.next_word_end (make_cursor 2 0) [| "a       !2"|]) [| "a       !2"|]).x 9
 
-    
-    
+let%test_unit "e_jump_row_base" = 
+    let row_jumped = (Word.next_word_end (make_cursor 4 0) [| "Hello"; "Worlds!"|]) in 
+    [%test_eq: int] row_jumped.y 1;
+    [%test_eq: int] row_jumped.x 5
+
+let%test_unit "e_jump_row_advanced" = 
+    let row_jumped = 
+        Word.next_word_end (Word.next_word_end (make_cursor 4 0) [| "Hello!"; " ***Worlds!"|]) [| "Hello!"; " ***Worlds!"|] in 
+    [%test_eq: int] row_jumped.y 1;
+    [%test_eq: int] row_jumped.x 3
+
+let%test_unit "e_jump_some_space_rows" = 
+    let row_jumped = (Word.next_word_end (make_cursor 4 0) [| "Hello  ";"  "; "  ds!"|]) in 
+        [%test_eq: int] row_jumped.y 2;
+        [%test_eq: int] row_jumped.x 3
