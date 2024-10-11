@@ -159,5 +159,6 @@ struct
           | _, _ -> wsb_aux (x-1) y current_ct 
         in wsb_aux (starting.x-1) starting.y NullChar 
 
-
+      
+      let fullword_start_backwards starting _buffer = starting
 end

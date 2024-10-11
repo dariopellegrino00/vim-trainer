@@ -135,3 +135,14 @@ let% test_unit "b_adv_inline_jumpback" =
     let c1 = (Word.word_start_backwards (make_cursor 8 0) [| "????hello"|]) in
     [%test_eq: int] c1.x 4;
     [%test_eq: int] c1.y 0
+
+let%test_unit "B_inline_movs" = 
+    let c1 = (Word.fullword_start_backwards (make_cursor 6 0) [| "????hello"|]) in 
+    let c2 = (Word.fullword_start_backwards (make_cursor 7 0) [| "word   !a"|]) in 
+    let c3 = (Word.fullword_start_backwards (make_cursor 6 0) [| " a?   a"|]) in 
+    [%test_eq: int] c1.x 0;
+    [%test_eq: int] c1.y 0;
+    [%test_eq: int] c2.x 0; 
+    [%test_eq: int] c2.y 0;
+    [%test_eq: int] c3.x 1;
+    [%test_eq: int] c3.y 0
