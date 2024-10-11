@@ -107,7 +107,6 @@ let%test_unit "E_jump_some_space_rows" =
 
 (* TESTING b and B commands in normal mode*)
 
-
 let%test_unit "b_inline_movs" = 
     let c1 = (Word.word_start_backwards (make_cursor 0 0) [| " "|]) in 
     let c2 = (Word.word_start_backwards (make_cursor 7 0) [| "word   a"|]) in 
@@ -123,3 +122,16 @@ let%test_unit "b_jump_space_rows_back" =
     let jump_spaces = Word.word_start_backwards (make_cursor 2 4) [| "oi"; "  "; " "; "  "; "  word"|] in
     [%test_eq: int] jump_spaces.x 0; 
     [%test_eq: int] jump_spaces.y 0
+
+let%test_unit "b_jump_more_rows_back" =
+    let first_jump = Word.word_start_backwards (make_cursor 1 2) [| "??!oi"; " ! "; " word "|] in
+    let second_jump = Word.word_start_backwards first_jump [| "??!oi"; " ! "; " word "|] in
+    [%test_eq: int] first_jump.x 1; 
+    [%test_eq: int] first_jump.y 1;
+    [%test_eq: int] second_jump.x 3;
+    [%test_eq: int] second_jump.y 0
+    
+let% test_unit "b_adv_inline_jumpback" = 
+    let c1 = (Word.word_start_backwards (make_cursor 8 0) [| "????hello"|]) in
+    [%test_eq: int] c1.x 4;
+    [%test_eq: int] c1.y 0
