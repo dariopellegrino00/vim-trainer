@@ -11,6 +11,8 @@ let setup () =
 (* example text buffer definition*)
 let buffer = 
   [| 
+    "     ";
+    "  ";
     "Hello, world!"; 
     "This is a simple text editor"; 
     "with Vim hjkl movements."; 
@@ -21,6 +23,7 @@ let buffer =
     "x    x x";
     "   x ";
     "              x";
+    "   ";
   |]
 
 (*for cursor logic and visuals*)
@@ -47,6 +50,8 @@ let eval_motion_cmd cmd cursor buffer =
     | NextFullWordStart -> cursor := Word.next_full_word_start !cursor buffer
     | NextWordEnd       -> cursor := Word.next_word_end !cursor buffer
     | NextFullWordEnd   -> cursor := Word.next_full_word_end !cursor buffer
+    | BackWordStart     -> cursor := Word.word_start_backwards !cursor buffer
+    | BackFullWordStart -> cursor := Word.fullword_start_backwards !cursor buffer
 (*|  -> remove_char_at_cursor buffer cursor (*TODO refactor params order*) *)
     | NotAMotion -> ()
   )

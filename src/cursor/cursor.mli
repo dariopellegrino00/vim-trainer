@@ -18,4 +18,6 @@ module Word : sig
   val next_full_word_start : t -> string array -> t
   val next_word_end : t -> string array -> t
   val next_full_word_end : t -> string array -> t
+  val word_start_backwards : t -> string array -> t
+  val fullword_start_backwards : t -> string array -> t 
 end
