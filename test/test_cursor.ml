@@ -146,3 +146,22 @@ let%test_unit "B_inline_movs" =
     [%test_eq: int] c2.y 0;
     [%test_eq: int] c3.x 1;
     [%test_eq: int] c3.y 0
+
+let%test_unit "B_jump_more_rows_back" =
+    let first_jump = Word.fullword_start_backwards (make_cursor 1 2) [| "??!oi"; " ! "; " word "|] in
+    let second_jump = Word.fullword_start_backwards first_jump [| " ?!oi"; " ! "; " word "|] in
+    [%test_eq: int] first_jump.x 1; 
+    [%test_eq: int] first_jump.y 1;
+    [%test_eq: int] second_jump.x 1;
+    [%test_eq: int] second_jump.y 0
+
+let%test_unit "B_bounds" = 
+    let jump = Word.fullword_start_backwards (make_cursor 0 0) [| " "|] in
+    let jump_again = Word.fullword_start_backwards jump [| " "|] in
+    [%test_eq: int] jump_again.x 0;
+    [%test_eq: int] jump_again.y 0
+
+let%test_unit "B_jump_space_rows_back" =
+    let jump_spaces = Word.fullword_start_backwards (make_cursor 2 4) [| " oi"; "  "; " "; "  "; "  !word"|] in
+    [%test_eq: int] jump_spaces.x 1; 
+    [%test_eq: int] jump_spaces.y 0
