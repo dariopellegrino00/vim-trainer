@@ -118,3 +118,8 @@ let%test_unit "b_inline_movs" =
     [%test_eq: int] c2.y 0;
     [%test_eq: int] c3.x 1;
     [%test_eq: int] c3.y 0
+
+let%test_unit "b_jump_space_rows_back" =
+    let jump_spaces = Word.word_start_backwards (make_cursor 2 4) [| "oi"; "  "; " "; "  "; "  word"|] in
+    [%test_eq: int] jump_spaces.x 0; 
+    [%test_eq: int] jump_spaces.y 0
