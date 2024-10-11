@@ -14,6 +14,7 @@ type motion =
   | NextFullWordStart
   | NextWordEnd
   | NextFullWordEnd
+  | BackWordStart
   | NotAMotion
 
 type operation = None
@@ -40,6 +41,7 @@ let motion_parser =
     char 'W' *> return NextFullWordStart;
     char 'e' *> return NextWordEnd;
     char 'E' *> return NextFullWordEnd;
+    char 'b' *> return BackWordStart;
   ] <|> return NotAMotion (* if choice fails the char is not a motion*)
 
 let count_parser =
