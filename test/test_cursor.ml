@@ -104,3 +104,17 @@ let%test_unit "E_jump_some_space_rows" =
     let row_jumped = (Word.next_full_word_end (make_cursor 4 0) [| "Hello  ";"  "; "  ds! "|]) in 
         [%test_eq: int] row_jumped.y 2;
         [%test_eq: int] row_jumped.x 4 
+
+(* TESTING b and B commands in normal mode*)
+
+
+let%test_unit "b_inline_movs" = 
+    let c1 = (Word.word_start_backwards (make_cursor 0 0) [| " "|]) in 
+    let c2 = (Word.word_start_backwards (make_cursor 7 0) [| "word   a"|]) in 
+    let c3 = (Word.word_start_backwards (make_cursor 6 0) [| " ??   a"|]) in 
+    [%test_eq: int] c1.x 0;
+    [%test_eq: int] c1.y 0;
+    [%test_eq: int] c2.x 0; 
+    [%test_eq: int] c2.y 0;
+    [%test_eq: int] c3.x 1;
+    [%test_eq: int] c3.y 0

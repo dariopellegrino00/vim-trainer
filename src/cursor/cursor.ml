@@ -145,5 +145,6 @@ struct
               | (NullChar | WhiteSpace), Escape -> nwe_aux 0 (y+1) Escape
               | _, (_ as cty) -> nwe_aux (x+1) y cty 
         in nwe_aux (starting.x+1) starting.y NullChar
-        
+      
+      let word_start_backwards starting _buffer = starting
 end 
