@@ -150,9 +150,9 @@ struct
         let rec wsb_aux x y last_ct =  
           let current_ct = if x >= 0 then get_char_type buffer.(y).[x] else Escape in
           match current_ct, last_ct with
-          | WhiteSpace, (Alhanumeric | Puctuation) -> {x = (x+1); y}
           | Puctuation, Alhanumeric
-          | Alhanumeric, Puctuation 
+          | Alhanumeric, Puctuation
+          | WhiteSpace, (Alhanumeric | Puctuation) -> {x = (x+1); y}
           | Escape, (Puctuation | Alhanumeric) -> {x = 0; y}
           | Escape, _ when y > 0 -> wsb_aux (String.length buffer.(y-1)-1) (y-1) Escape
           | Escape, _ -> {x = 0; y = 0}
