@@ -146,5 +146,18 @@ struct
               | _, (_ as cty) -> nwe_aux (x+1) y cty 
         in nwe_aux (starting.x+1) starting.y NullChar
       
-      let word_start_backwards starting _buffer = starting
-end 
+      let word_start_backwards starting buffer =
+        let rec wsb_aux x y last_ct =  
+          let current_ct = if x >= 0 then get_char_type buffer.(y).[x] else Escape in
+          match current_ct, last_ct with
+          | WhiteSpace, (Alhanumeric | Puctuation) -> {x = (x+1); y}
+          | Puctuation, Alhanumeric
+          | Alhanumeric, Puctuation 
+          | Escape, (Puctuation | Alhanumeric) -> {x = 0; y}
+          | Escape, _ when y > 0 -> wsb_aux (String.length buffer.(y-1)-1) (y-1) Escape
+          | Escape, _ -> {x = 0; y = 0}
+          | _, _ -> wsb_aux (x-1) y current_ct 
+        in wsb_aux (starting.x-1) starting.y NullChar 
+
+
+end
