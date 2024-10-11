@@ -55,3 +55,52 @@ let%test_unit "W_jump_inline" =
     [%test_eq: int] (Word.next_full_word_start starting_pos [| "! a"|]).x 2;
     [%test_eq: int] (Word.next_full_word_start starting_pos [| " !  "|]).x 1
 
+let%test_unit "e_jump_inline" = 
+    [%test_eq: int] (Word.next_word_end (make_cursor 0 0) [| "Hello World!"|]).x 4;
+    [%test_eq: int] (Word.next_word_end (make_cursor 0 0) [| " World!"|]).x 5;
+    [%test_eq: int] (Word.next_word_end (make_cursor 3 0) [| "word!word"|]).x 4;
+    [%test_eq: int] (Word.next_word_end (make_cursor 2 0) [| "wor_d"|]).x 4;
+    [%test_eq: int] (Word.next_word_end (make_cursor 4 0) [| "space  "|]).x 6;
+    [%test_eq: int] (Word.next_word_end (make_cursor 0 0) [| "2"|]).x 0;
+    [%test_eq: int] (Word.next_word_end (Word.next_word_end (make_cursor 0 0) [| "a       !2"|]) [| "a       !2"|]).x 9
+
+let%test_unit "e_jump_row_base" = 
+    let row_jumped = (Word.next_word_end (make_cursor 4 0) [| "Hello"; "Worlds!"|]) in 
+    [%test_eq: int] row_jumped.y 1;
+    [%test_eq: int] row_jumped.x 5
+
+let%test_unit "e_jump_row_advanced" = 
+    let row_jumped = 
+        Word.next_word_end (Word.next_word_end (make_cursor 4 0) [| "Hello!"; " ***Worlds!"|]) [| "Hello!"; " ***Worlds!"|] in 
+    [%test_eq: int] row_jumped.y 1;
+    [%test_eq: int] row_jumped.x 3
+
+let%test_unit "e_jump_some_space_rows" = 
+    let row_jumped = (Word.next_word_end (make_cursor 4 0) [| "Hello  ";"  "; "  ds!"|]) in 
+        [%test_eq: int] row_jumped.y 2;
+        [%test_eq: int] row_jumped.x 3
+
+let%test_unit "E_jump_inline" = 
+    [%test_eq: int] (Word.next_full_word_end (make_cursor 0 0) [| "Hello World!"|]).x 4;
+    [%test_eq: int] (Word.next_full_word_end (make_cursor 0 0) [| " World!"|]).x 6;
+    [%test_eq: int] (Word.next_full_word_end (make_cursor 3 0) [| "word!word"|]).x 8;
+    [%test_eq: int] (Word.next_full_word_end (make_cursor 2 0) [| "wor_d"|]).x 4;
+    [%test_eq: int] (Word.next_full_word_end (make_cursor 0 0) [| "2"|]).x 0;
+    [%test_eq: int] (Word.next_full_word_end (make_cursor 0 5) [| "spaces  "|]).x 7;
+    [%test_eq: int] (Word.next_full_word_end (Word.next_word_end (make_cursor 0 0) [| " a       !2"|]) [| " a       !2"|]).x 10
+
+let%test_unit "E_jump_row_base" = 
+    let row_jumped = (Word.next_full_word_end (make_cursor 4 0) [| "Hello"; "Worlds!"|]) in 
+    [%test_eq: int] row_jumped.y 1;
+    [%test_eq: int] row_jumped.x 6
+
+let%test_unit "E_jump_row_advanced" =  
+    let row_jumped = 
+        Word.next_full_word_end (Word.next_full_word_end (make_cursor 4 0) [| "Hello!"; " ***Worlds!"|]) [| "Hello!"; " ***Worlds!"|] in 
+    [%test_eq: int] row_jumped.y 1;
+    [%test_eq: int] row_jumped.x 10 
+
+let%test_unit "E_jump_some_space_rows" = 
+    let row_jumped = (Word.next_full_word_end (make_cursor 4 0) [| "Hello  ";"  "; "  ds! "|]) in 
+        [%test_eq: int] row_jumped.y 2;
+        [%test_eq: int] row_jumped.x 4 
