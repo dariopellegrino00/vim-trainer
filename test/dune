@@ -4,5 +4,5 @@
  (preprocess 
   (pps ppx_inline_test ppx_assert))
  (inline_tests)
- (modules test_cursor)
+ (modules test_cursor test_normal_parser)
  )

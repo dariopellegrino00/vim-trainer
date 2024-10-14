@@ -33,33 +33,35 @@ let cursor_old = ref !cursor
 let blink = ref true 
 let blink_delay = 0.5
 let start_blink_time = ref (get_time ())
+let string_cmd = ref ""
 
 (**normal mode motion command evaluator*)
 let eval_motion_cmd cmd cursor buffer = 
   match cmd with 
-  |  MotionOnly (_, c) -> (
-    match c with 
-    | CharRight   -> cursor := move_right !cursor buffer
-    | CharLeft    -> cursor := move_left !cursor
-    | LineUp      -> cursor := move_up !cursor buffer
-    | LineDown    -> cursor := move_down !cursor buffer
-    | StartOfLine -> cursor := start_of_line !cursor
-    | EndOfLine   -> cursor := end_of_line !cursor buffer
-    | BeginOfLine -> cursor := first_nws_char !cursor buffer
-    | NextWordStart     -> cursor := Word.next_word_start !cursor buffer
-    | NextFullWordStart -> cursor := Word.next_full_word_start !cursor buffer
-    | NextWordEnd       -> cursor := Word.next_word_end !cursor buffer
-    | NextFullWordEnd   -> cursor := Word.next_full_word_end !cursor buffer
-    | BackWordStart     -> cursor := Word.word_start_backwards !cursor buffer
-    | BackFullWordStart -> cursor := Word.fullword_start_backwards !cursor buffer
-(*|  -> remove_char_at_cursor buffer cursor (*TODO refactor params order*) *)
-    | NotAMotion -> ()
+  |  MotionOnly (n, c) -> (
+    for _ = 0 to n-1 do 
+      match c with 
+      | CharRight   -> cursor := move_right !cursor buffer
+      | CharLeft    -> cursor := move_left !cursor
+      | LineUp      -> cursor := move_up !cursor buffer
+      | LineDown    -> cursor := move_down !cursor buffer
+      | StartOfLine -> cursor := start_of_line !cursor
+      | EndOfLine   -> cursor := end_of_line !cursor buffer
+      | BeginOfLine -> cursor := first_nws_char !cursor buffer
+      | NextWordStart     -> cursor := Word.next_word_start !cursor buffer
+      | NextFullWordStart -> cursor := Word.next_full_word_start !cursor buffer
+      | NextWordEnd       -> cursor := Word.next_word_end !cursor buffer
+      | NextFullWordEnd   -> cursor := Word.next_full_word_end !cursor buffer
+      | BackWordStart     -> cursor := Word.word_start_backwards !cursor buffer
+      | BackFullWordStart -> cursor := Word.fullword_start_backwards !cursor buffer
+    done
   )
   | SimleOperation c -> (
     match c with 
     | "x" -> remove_char_at_cursor buffer cursor
     | _   -> () 
   )
+  | NotACommand | Partial _-> ()
 
 let rec loop () =
   if Raylib.window_should_close () then Raylib.close_window ()
@@ -76,11 +78,16 @@ let rec loop () =
     cursor_old := !cursor;
 
     let input_key = get_char_pressed () in 
-    if Uchar.to_char input_key != (char_of_int 0) then ( 
-      let string_cmd = String.make 1 (Uchar.to_char input_key) in 
-      let command = NormalModeParser.parse_command string_cmd in 
-      eval_motion_cmd command cursor buffer
+    if Uchar.to_char input_key != (char_of_int 0) then (
+      let key = String.make 1 (Uchar.to_char input_key) in 
+      string_cmd := !string_cmd ^ key;
+      let command = NormalModeParser.parse_command !string_cmd in 
+      match command with 
+        NotACommand -> string_cmd := "" 
+      | Partial _   -> () 
+      | _           -> string_cmd := ""; eval_motion_cmd command cursor buffer
     );
+    
    
     begin_drawing ();
     clear_background Color.darkgray;
