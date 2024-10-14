@@ -53,13 +53,13 @@ let count_parser =
 let command_parser =
   simple_op_parser (*if simple_of_parser fails this tries the other more complex parser for motions*)
   <|> (
-  motion_parser >>= fun motion ->
+  motion_parser >>= fun motion -> (*motion no count*)
   return (MotionOnly (1, motion))
   )
-  <|> (count_parser >>= fun count ->
+  <|> (count_parser >>= fun count -> (*motion with count *)
   motion_parser >>= fun motion ->
   return (MotionOnly (count, motion))) 
-  <|> (count_parser >>= fun count -> return (Partial (count))) 
+  <|> (count_parser >>= fun count -> return (Partial (count))) (* count with no motion*)
 
 (** parse the input string as vim normal mode command*)
 let parse_command input =

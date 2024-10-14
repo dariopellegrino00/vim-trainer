@@ -170,5 +170,5 @@ struct
       | Escape, _ -> {x = 0; y = 0}
       | _, _ -> wsb_aux (x-1) y current_ct 
     in wsb_aux (starting.x-1) starting.y NullChar 
-    
+
 end
