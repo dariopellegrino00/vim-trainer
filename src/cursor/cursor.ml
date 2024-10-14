@@ -118,56 +118,57 @@ struct
         | _ , (_ as cty) -> nfws_aux (x+1) y cty 
     in nfws_aux (starting.x) starting.y start_char_type
 
-    let next_word_end starting buffer = 
-      let lines = Array.length buffer in
-      let _start_char_ty = get_char_type buffer.(starting.y).[starting.x] in
-      let rec nwe_aux x y last_ct =
-        if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
-          else
-          let current_ct = if x < String.length buffer.(y) then get_char_type buffer.(y).[x] else Escape
-          in match (last_ct, current_ct) with
-            | Alhanumeric, Puctuation 
-            | Puctuation, Alhanumeric 
-            | (Alhanumeric | Puctuation), (WhiteSpace | Escape) -> {x = (x-1); y}
-            | (NullChar | WhiteSpace) , Escape -> nwe_aux 0 (y+1) Escape
-            | _, (_ as cty) -> nwe_aux (x+1) y cty
-      in nwe_aux (starting.x+1) starting.y NullChar
+  let next_word_end starting buffer = 
+    let lines = Array.length buffer in
+    let _start_char_ty = get_char_type buffer.(starting.y).[starting.x] in
+    let rec nwe_aux x y last_ct =
+      if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
+        else
+        let current_ct = if x < String.length buffer.(y) then get_char_type buffer.(y).[x] else Escape
+        in match (last_ct, current_ct) with
+          | Alhanumeric, Puctuation 
+          | Puctuation, Alhanumeric 
+          | (Alhanumeric | Puctuation), (WhiteSpace | Escape) -> {x = (x-1); y}
+          | (NullChar | WhiteSpace) , Escape -> nwe_aux 0 (y+1) Escape
+          | _, (_ as cty) -> nwe_aux (x+1) y cty
+    in nwe_aux (starting.x+1) starting.y NullChar
 
-      let next_full_word_end starting buffer = 
-        let lines = Array.length buffer in
-        let rec nwe_aux x y last_ct =
-          if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
-            else
-            let current_ct = if x < String.length buffer.(y) then get_char_type buffer.(y).[x] else Escape
-            in match (last_ct, current_ct) with
-              | (Alhanumeric | Puctuation), Escape   
-              | (Alhanumeric | Puctuation), WhiteSpace -> {x = (x-1); y}
-              | (NullChar | WhiteSpace), Escape -> nwe_aux 0 (y+1) Escape
-              | _, (_ as cty) -> nwe_aux (x+1) y cty 
-        in nwe_aux (starting.x+1) starting.y NullChar
-      
-      let word_start_backwards starting buffer =
-        let rec wsb_aux x y last_ct =  
-          let current_ct = if x >= 0 then get_char_type buffer.(y).[x] else Escape in
-          match current_ct, last_ct with
-          | Puctuation, Alhanumeric
-          | Alhanumeric, Puctuation
-          | WhiteSpace, (Alhanumeric | Puctuation) -> {x = (x+1); y}
-          | Escape, (Puctuation | Alhanumeric) -> {x = 0; y}
-          | Escape, _ when y > 0 -> wsb_aux (String.length buffer.(y-1)-1) (y-1) Escape
-          | Escape, _ -> {x = 0; y = 0}
-          | _, _ -> wsb_aux (x-1) y current_ct 
-        in wsb_aux (starting.x-1) starting.y NullChar 
+  let next_full_word_end starting buffer = 
+    let lines = Array.length buffer in
+    let rec nwe_aux x y last_ct =
+      if lines <= y then {x = String.length buffer.(lines-1)-1; y = lines-1}
+        else
+        let current_ct = if x < String.length buffer.(y) then get_char_type buffer.(y).[x] else Escape
+        in match (last_ct, current_ct) with
+          | (Alhanumeric | Puctuation), Escape   
+          | (Alhanumeric | Puctuation), WhiteSpace -> {x = (x-1); y}
+          | (NullChar | WhiteSpace), Escape -> nwe_aux 0 (y+1) Escape
+          | _, (_ as cty) -> nwe_aux (x+1) y cty 
+    in nwe_aux (starting.x+1) starting.y NullChar
+  
+  let word_start_backwards starting buffer =
+    let rec wsb_aux x y last_ct =  
+      let current_ct = if x >= 0 then get_char_type buffer.(y).[x] else Escape in
+      match current_ct, last_ct with
+      | Puctuation, Alhanumeric
+      | Alhanumeric, Puctuation
+      | WhiteSpace, (Alhanumeric | Puctuation) -> {x = (x+1); y}
+      | Escape, (Puctuation | Alhanumeric) -> {x = 0; y}
+      | Escape, _ when y > 0 -> wsb_aux (String.length buffer.(y-1)-1) (y-1) Escape
+      | Escape, _ -> {x = 0; y = 0}
+      | _, _ -> wsb_aux (x-1) y current_ct 
+    in wsb_aux (starting.x-1) starting.y NullChar 
 
-      
-      let fullword_start_backwards starting buffer = 
-        let rec wsb_aux x y last_ct =  
-          let current_ct = if x >= 0 then get_char_type buffer.(y).[x] else Escape in
-          match current_ct, last_ct with
-          | WhiteSpace, (Alhanumeric | Puctuation) -> {x = (x+1); y}
-          | Escape, (Puctuation | Alhanumeric) -> {x = 0; y}
-          | Escape, _ when y > 0 -> wsb_aux (String.length buffer.(y-1)-1) (y-1) Escape
-          | Escape, _ -> {x = 0; y = 0}
-          | _, _ -> wsb_aux (x-1) y current_ct 
-        in wsb_aux (starting.x-1) starting.y NullChar 
+  
+  let fullword_start_backwards starting buffer = 
+    let rec wsb_aux x y last_ct =  
+      let current_ct = if x >= 0 then get_char_type buffer.(y).[x] else Escape in
+      match current_ct, last_ct with
+      | WhiteSpace, (Alhanumeric | Puctuation) -> {x = (x+1); y}
+      | Escape, (Puctuation | Alhanumeric) -> {x = 0; y}
+      | Escape, _ when y > 0 -> wsb_aux (String.length buffer.(y-1)-1) (y-1) Escape
+      | Escape, _ -> {x = 0; y = 0}
+      | _, _ -> wsb_aux (x-1) y current_ct 
+    in wsb_aux (starting.x-1) starting.y NullChar 
+
 end
