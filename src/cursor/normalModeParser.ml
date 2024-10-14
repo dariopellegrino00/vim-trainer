@@ -16,11 +16,12 @@ type motion =
   | NextFullWordEnd
   | BackWordStart
   | BackFullWordStart
-  | NotAMotion
 
 type operation = None
 
-type command = 
+type command =
+  | Partial of int 
+  | NotACommand
   | MotionOnly of int * motion
   | SimleOperation of string
 
@@ -44,20 +45,25 @@ let motion_parser =
     char 'E' *> return NextFullWordEnd;
     char 'b' *> return BackWordStart;
     char 'B' *> return BackFullWordStart;
-  ] <|> return NotAMotion (* if choice fails the char is not a motion*)
+  ] 
 
 let count_parser =
-  option 1 (take_while1 (function '1' .. '9' -> true | _ -> false) >>| int_of_string)
+  take_while1 (function '0' .. '9' -> true | _ -> false) >>| int_of_string
 
 let command_parser =
-  simple_op_parser <|> (*if simple_of_parser fails this tries the other more complex parser for motions*)
-  (count_parser >>= fun count ->
+  simple_op_parser (*if simple_of_parser fails this tries the other more complex parser for motions*)
+  <|> (
+  motion_parser >>= fun motion -> (*motion no count*)
+  return (MotionOnly (1, motion))
+  )
+  <|> (count_parser >>= fun count -> (*motion with count *)
   motion_parser >>= fun motion ->
-  return (MotionOnly (count, motion)))
+  return (MotionOnly (count, motion))) 
+  <|> (count_parser >>= fun count -> return (Partial (count))) (* count with no motion*)
 
 (** parse the input string as vim normal mode command*)
 let parse_command input =
-  match parse_string ~consume:Consume.Prefix command_parser input with
+  match parse_string ~consume:Consume.All command_parser input with
   | Ok cmd -> cmd
-  | Error msg -> failwith (msg  ^ " : unrecognized input in normal mode parser with input : " ^ input)
+  | Error _ -> NotACommand
 
