@@ -1,0 +1,9 @@
+ delete all x here to win! 
+ x  x 
+ x     x       x
+     x     x
+     x              x
+    x       x
+          x                   x
+x           x   x
+    

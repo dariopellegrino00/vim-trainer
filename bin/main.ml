@@ -8,23 +8,27 @@ let setup () =
   Raylib.set_target_fps 60; (*TODO: refactor time based on fps*)
   set_trace_log_level Fatal (* Show only warnings *)
 
+let completed_level f buffer = Array.for_all f buffer
+
+let lines file =
+  let contents = In_channel.with_open_bin file In_channel.input_all in
+  String.split_on_char '\n' contents
+
+let list_to_array list = 
+    let list_size = List.length list in
+    let new_array = Array.make list_size "" in
+    let rec list_to_array i = function
+      hd :: tl -> new_array.(i) <- hd; list_to_array (i+1) tl
+    | _        -> new_array in
+    list_to_array 0 list
+
+let load_level1 = 
+  let level1 =  lines "resources/levels/level1.txt" in 
+  list_to_array level1
+let completed_level1 buffer = completed_level (fun line -> (String.for_all (fun c -> c <> 'x') line)) buffer 
+
 (* example text buffer definition*)
-let buffer = 
-  [| 
-    "     ";
-    "  ";
-    "Hello, world!"; 
-    "This is a simple text editor"; 
-    "with Vim hjkl movements."; 
-    "delete all the x to win ! ! !";
-    "*!**a magnum ! ";
-    "  x   xxx";
-    "x ";
-    "x    x x";
-    "   x ";
-    "              x";
-    "   ";
-  |]
+let buffer = load_level1
 
 (*for cursor logic and visuals*)
 let cursor = ref create_cursor
@@ -101,7 +105,7 @@ let rec loop () =
       | _           -> string_cmd := ""; eval_motion_cmd command cursor buffer
     );
     
-   
+    
     begin_drawing ();
     clear_background Color.darkgray;
     
@@ -112,6 +116,7 @@ let rec loop () =
     draw_buffer buffer font;
 
     end_drawing ();
-    loop ()
+    if not (completed_level1 buffer) then loop ()
+    
 
 let () = setup () |> loop
