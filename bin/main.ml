@@ -2,6 +2,8 @@ open Raylib
 open Cursor 
 open Drawer
 open NormalModeParser
+open NormalModeEvaluator
+open TextBuffer
 
 let setup () =
   Raylib.init_window 400 350 "vimtrainer";
@@ -9,18 +11,6 @@ let setup () =
   set_trace_log_level Fatal (* Show only warnings *)
 
 let completed_level f buffer = Array.for_all f buffer
-
-let lines file =
-  let contents = In_channel.with_open_bin file In_channel.input_all in
-  String.split_on_char '\n' contents
-
-let list_to_array list = 
-    let list_size = List.length list in
-    let new_array = Array.make list_size "" in
-    let rec list_to_array i = function
-      hd :: tl -> new_array.(i) <- hd; list_to_array (i+1) tl
-    | _        -> new_array in
-    list_to_array 0 list
 
 let load_level1 = 
   let level1 =  lines "resources/levels/level1.txt" in 
@@ -38,47 +28,6 @@ let blink = ref true
 let blink_delay = 0.5
 let start_blink_time = ref (get_time ())
 let string_cmd = ref ""
-
-(**normal mode motion command evaluator*)
-let eval_motion_cmd cmd cursor buffer = 
-  match cmd with 
-  |  MotionOnly (n, c) -> (
-    try 
-      let still_count = ref 0 in
-      (* cant use global cursor_old here is for cursor animation logic inside main*)
-      let aux_cursor_old = ref !cursor in 
-      for i = 0 to n-1 do 
-        (* Exit if cursor is still for some iters, to avoid repeating a lot of operations when cursor is still
-        4 to be always sure that repeated movs that sometimes remain still for 1 or 2 iters like $*) 
-        if !aux_cursor_old <> !cursor then still_count := 0
-        else if !still_count > 4 then raise Exit else still_count := !still_count + 1;
-        aux_cursor_old := !cursor; 
-        match c with 
-        | CharRight   -> cursor := move_right !cursor buffer
-        | CharLeft    -> cursor := move_left !cursor
-        | LineUp      -> cursor := move_up !cursor buffer
-        | LineDown    -> cursor := move_down !cursor buffer
-        | StartOfLine -> cursor := start_of_line !cursor
-        | EndOfLine   -> (
-          cursor := end_of_line !cursor buffer;
-          if n-1-i > 0 then cursor := end_of_line (move_down !cursor buffer) buffer
-        )
-        | BeginOfLine -> cursor := first_nws_char !cursor buffer
-        | NextWordStart     -> cursor := Word.next_word_start !cursor buffer
-        | NextFullWordStart -> cursor := Word.next_full_word_start !cursor buffer
-        | NextWordEnd       -> cursor := Word.next_word_end !cursor buffer
-        | NextFullWordEnd   -> cursor := Word.next_full_word_end !cursor buffer
-        | BackWordStart     -> cursor := Word.word_start_backwards !cursor buffer
-        | BackFullWordStart -> cursor := Word.fullword_start_backwards !cursor buffer
-      done
-    with Exit -> print_endline "***DEBUG: exit for";()
-  )
-  | SimleOperation c -> (
-    match c with 
-    | "x" -> remove_char_at_cursor buffer cursor
-    | _   -> () 
-  )
-  | NotACommand | Partial _-> ()
 
 let rec loop () =
   if Raylib.window_should_close () then Raylib.close_window ()

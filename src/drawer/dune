@@ -1,5 +1,0 @@
-(library
- (name drawer)  
- (public_name vtrainer.drawer) 
- (modules drawer)
- (libraries raylib cursor))  

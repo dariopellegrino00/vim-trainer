@@ -1,0 +1,6 @@
+(library
+ (wrapped false) 
+ (name core)  
+ (public_name vtrainer.core) 
+ (libraries angstrom raylib)
+ )
