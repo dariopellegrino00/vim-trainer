@@ -1,6 +1,6 @@
 (library
  (name test_vtrainer)
- (libraries vtrainer.cursor)
+ (libraries vtrainer.core)
  (preprocess 
   (pps ppx_inline_test ppx_assert))
  (inline_tests)

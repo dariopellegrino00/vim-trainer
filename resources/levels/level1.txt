@@ -1,4 +1,4 @@
- delete all x here to win! 
+ press x on all xs to win! 
  x  x 
  x     x       x
      x     x
